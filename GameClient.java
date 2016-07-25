@@ -1,5 +1,6 @@
 package tictactoe;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.io.*;
 import java.net.*;
@@ -21,13 +22,21 @@ public class GameClient extends JApplet {
 	}
 	private void makeGUI() {
 		grid = new JPanel();
-		grid.setLayout(new GridLayout(3, 3));
-		
+		grid.setBackground(Color.BLACK);
+		grid.setLayout(new GridLayout(3, 3,5,5));
+		for (int i=0;i<3;i++)
+			for (int j=0;j<3;j++) {
+				GamePanel gp = new GamePanel();
+				gp.setLoc(i, j);
+				//gp.setPanel("O");
+				grid.add(gp);
+				//gp.repaint();
+			}
 		add(grid, BorderLayout.CENTER);
 		status = new JLabel("Tic Tac Toe Started");
 		add(status, BorderLayout.SOUTH);
-		setSize(400, 400);
-	
+		setSize(800, 800);
+		
 		setVisible(true);
 	}
 	private void setCon() {

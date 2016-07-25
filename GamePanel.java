@@ -1,5 +1,7 @@
 package tictactoe;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -7,6 +9,8 @@ import javax.swing.*;
 
 public class GamePanel extends JPanel {
 	private String toDraw;
+	private int row;
+	private int col;
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
      JFrame f = new JFrame();
@@ -22,12 +26,31 @@ public class GamePanel extends JPanel {
 	}
 	public GamePanel() {
 		setSize(200,200);
+		setOpaque(true);
+		setBackground(Color.WHITE);
 		toDraw = "";
 	}
 	public void setPanel(String inDraw) {
 		
 		toDraw = inDraw;
 	}
+	public void setLoc(int row, int col){
+		this.row = row;
+		this.col = col;
+	}
+	public int getRow() {
+		return row;
+		
+	}
+	public int getCol() {
+		return col;
+	}
+	 public boolean equals(GamePanel g) {
+		 if((g.getRow()==row )&&(g.getCol()==col)) {
+			 return true;
+		 }
+		 else return false;
+	 }
 	@Override
 	protected void paintComponent(Graphics g) {
 		// TODO Auto-generated method stub
