@@ -8,7 +8,7 @@ package tictactoe;
  * bit 4 - player registered
  * bit 5 - player X move
  * bit 6 - winning player
- * @author blair
+ * @author blair 
  * 
  */
 public class ComHelper {
