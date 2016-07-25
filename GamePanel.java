@@ -7,10 +7,11 @@ import java.awt.Graphics2D;
 
 import javax.swing.*;
 
-public class GamePanel extends JPanel {
+public class GamePanel extends JButton {
 	private String toDraw;
 	private int row;
 	private int col;
+	private boolean waiting;
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
      JFrame f = new JFrame();
@@ -50,6 +51,12 @@ public class GamePanel extends JPanel {
 			 return true;
 		 }
 		 else return false;
+	 }
+	 public void setWaiting(boolean w) {
+		 waiting = w;
+	 }
+	 public boolean isWaiting() {
+		 return waiting;
 	 }
 	@Override
 	protected void paintComponent(Graphics g) {

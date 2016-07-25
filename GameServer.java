@@ -28,7 +28,7 @@ public class GameServer extends JFrame {
 				
 				status.append("Player " + clientID + " from " + s.getInetAddress().getHostName() + " has signed on\n");
 				//get thread 
-				ClientTask ct = new ClientTask(s);
+				ClientTask ct = new ClientTask(s,clientID);
 				Thread thread = new Thread(ct);
 				thread.start();
 				
@@ -40,11 +40,27 @@ public class GameServer extends JFrame {
 		}
 	}
 	public class ClientTask implements Runnable {
-		public ClientTask(Socket s) {
-			
+		Socket socket;
+		int playerID;
+		public ClientTask(Socket s, int pid) {
+			socket = s;
+			playerID = pid;
 		}
 		public void run() {
-			
+			try {
+				DataInputStream in = new DataInputStream(socket.getInputStream());
+				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+				out.writeByte(16+playerID);
+				while (true) {
+					int inMsg = in.readByte() ;	
+					int row = inMsg >> 2;
+					int col = inMsg & 3;
+					status.append("Move is :" + row + ","+col+"\n");
+				}
+			}
+			catch (IOException e) {
+				System.err.println(e.toString());
+			}
 		}
 		
 	}
