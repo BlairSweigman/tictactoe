@@ -11,6 +11,7 @@ package tictactoe;
  * 		1111 (15) X sent with coords
  * 		0000 (0) O sent with coords 
  * 		0100 (4) Game start
+ * 		1000 (8) Invalid Move
  * bit 4 - player registered
  * bit 5 - player X move
  * bit 6 - winning player
@@ -18,9 +19,13 @@ package tictactoe;
  * 
  */
 public class ComHelper {
- public static final int PLAYER =16;
- public static final int X = 32;
- public static final int WINNER = 32;
+ public static final int PLAYER =0;
+ public static final int X = 1;
+ public static final int O = 2;
+ public static final int INVALID = 3;
+ public static final int START =4;
+ public static final int WINNER = 5;
+
  public static final int ROWSHIFT = 2;
  public static final int COLMASK = 3;
  
@@ -61,10 +66,10 @@ public class ComHelper {
  public  int getCol() {
 	 return (getData() & COLMASK);
  }
- private int getMsg() {
+ public int getMsg() {
 	 return (message >> 4);
  }
- private int getData() {
+ public  int getData() {
 	 return (message & 15);
  }
 }

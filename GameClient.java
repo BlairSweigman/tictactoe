@@ -7,14 +7,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 @SuppressWarnings("serial")
 public class GameClient extends JApplet {
 	private JPanel grid;
 	private JLabel status;
+	private ArrayList<GamePanel> playBoard;
 	private DataInputStream in;
 	private DataOutputStream out;
+	private int playerID;
+	private String toDraw;
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		new GameClient();
@@ -32,14 +37,16 @@ public class GameClient extends JApplet {
 		grid.setBackground(Color.BLACK);
 		
 		grid.setLayout(new GridLayout(3, 3,5,5));
+		playBoard = new ArrayList<>();
 		for (int i=0;i<3;i++)
 			for (int j=0;j<3;j++) {
 				GamePanel gp = new GamePanel();
 				gp.setLoc(i, j);
-				gp.setWaiting(false);
+				gp.setWaiting(true);
 				gp.addActionListener(new GPListener() );
 				//gp.setPanel("O");
 				grid.add(gp);
+				playBoard.add(gp);
 				//gp.repaint();
 			}
 		add(grid, BorderLayout.CENTER);
@@ -48,6 +55,13 @@ public class GameClient extends JApplet {
 		setSize(800, 800);
 		
 		setVisible(true);
+	}
+	private void setWaiting(boolean b) {
+		
+		for (GamePanel gamePanel : playBoard) {
+			gamePanel.setWaiting(b);
+		}
+		
 	}
 	private void setCon() {
 		try {
@@ -73,6 +87,29 @@ public class GameClient extends JApplet {
 				while (true) {
 					int inMsg = in.readByte();
 					System.out.println("From server:"+ inMsg);
+					ComHelper com = new ComHelper(inMsg);
+					if (com.getMsg()==ComHelper.START) {
+						playerID=com.getData();
+						if (playerID==1) {
+							
+							setWaiting(false);
+							status.setText("Game started. You are X and you go First");
+						}
+						else {
+							setWaiting(true);
+							status.setText("Game started. You are O. Player X starts");
+						}
+					}
+					else if (com.getMsg()==ComHelper.X)	{
+						int x = com.getRow();
+						int y = com.getCol();
+						for (GamePanel gp : playBoard) {
+							if( ( gp.getRow() ==x) && (gp.getCol() ==y)) {
+								gp.setPanel("X");
+								gp.repaint();
+							}
+						}
+					}
 				}
 			}
 			catch (IOException e) {
