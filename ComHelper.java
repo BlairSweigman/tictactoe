@@ -1,13 +1,16 @@
 package tictactoe;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 /**
  * Helps out communication between server and client:
  * server sends the following information:
  * bit 0-3 panel coordinates, player id
  * bit 4-7 Message
  * message pattern:
- * 		0001 (1) register player
- * 		0010 (2) winner with player id
+ * 		0001 ---- (1) register player
+ * 		0010 ---- (2) winner with player id
  * 		1111 (15) X sent with coords
  * 		0000 (0) O sent with coords 
  * 		0100 (4) Game start
@@ -19,57 +22,48 @@ package tictactoe;
  * 
  */
 public class ComHelper {
- public static final int PLAYER =0;
- public static final int X = 1;
- public static final int O = 2;
- public static final int INVALID = 3;
- public static final int START =4;
- public static final int WINNER = 5;
 
- public static final int ROWSHIFT = 2;
- public static final int COLMASK = 3;
+
+ 
+
+ 
  
  private int message;
- public ComHelper (int message) {
-	 this.message = message;
+ private DataOutputStream out;
+ private Player player;
+ public ComHelper ( DataOutputStream out,Player p) {
+	 this.out = out;
+	 player = p;
+	
  }
- public ComHelper (int msgBits, int dataBits) {
-	 message = (msgBits << 4) + dataBits;
+ public void sendStart() throws IOException {
+	 int m = Messenger.START + player.getPlayerID();
+	 out.writeInt(m);
+ }
+ public void sendX(int row, int col) throws IOException {
+	 out.writeInt( Messenger.X + (row<<Messenger.ROWSHIFT) + col);
+	
+ }
+ public void sendO(int row, int col) throws IOException {
+	 out.writeInt( Messenger.O + (row<<Messenger.ROWSHIFT) + col);
+ }
+ public void sendInvalid() throws IOException{
 	 
  }
+ public void sendWin(int winningPlayer) throws IOException { 
+	 out.writeInt( Messenger.WIN + winningPlayer);
+ }
+
  public int getMessage() {
 	 return message;
  }
- public boolean isPlayerMsg() {
-	 if((message & PLAYER)==PLAYER) {
-		 return true;
-	 }
-	 else return false;
- }
- public boolean isWinMsg() {
-	 if((message & WINNER)==WINNER) {
-		 return true;
-	 }
-	 else return false;
- }
+
+
  public static void main(String[] args) {
-	 ComHelper c = new ComHelper(7,10);
-	 System.out.println(c.getMsg());
-	 System.out.println(c.getData());
-	 System.out.println(c.getRow());
-	 System.out.println(c.getCol());
+	
 
  }
- public  int getRow() {
-	 return (getData() >> ROWSHIFT);
- }
- public  int getCol() {
-	 return (getData() & COLMASK);
- }
- public int getMsg() {
-	 return (message >> 4);
- }
- public  int getData() {
-	 return (message & 15);
- }
+
+
+ 
 }

@@ -1,9 +1,12 @@
 package tictactoe;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.*;
 
 import javax.swing.*;
 
@@ -22,8 +25,9 @@ public class GamePanel extends JButton {
      f.add(p);
     
      f.setVisible(true);
-     p.setPanel("O");
+     p.setPanel("X");
      p.repaint();
+    
 	}
 	public GamePanel() {
 		setSize(200,200);
@@ -63,12 +67,23 @@ public class GamePanel extends JButton {
 		// TODO Auto-generated method stub
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(new BasicStroke(5));
+		if (waiting) {
+			g2.setColor(Color.GRAY);
+		}
+		else {
+			g2.setColor(Color.BLACK);
+		}
+		
 		if (toDraw=="X") {
-			g2.drawLine(0, 0, 100, 100);
-			g2.drawLine(0, 100, 100, 0);
+			g2.draw(new Line2D.Float(5, 5, 75, 75));
+			g2.draw(new Line2D.Float(5, 75, 75, 5));
+			//g2.drawLine(5, 5, 75, 75);
+			//g2.drawLine(5, 75, 75, 5);
 		}
 		else if (toDraw=="O") {
-			g2.drawOval(25, 25, 50, 50);
+			
+			g2.drawOval(15, 15, 50, 50);
 		}
 		else {
 			g2.dispose();

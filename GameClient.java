@@ -20,16 +20,24 @@ public class GameClient extends JApplet {
 	private DataOutputStream out;
 	private int playerID;
 	private String toDraw;
+	private Player p ;
+	private static String hostname;
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		// check if there is a hostname, if not, connect to localhost
+		if (args.length > 0)
+			hostname = args[0];
+		else
+			hostname = "localhost";
 		new GameClient();
 	}
 	public GameClient() {
+		this.setSize(1000, 1000);
 		makeGUI();
 		setCon();
 		RunGame rg = new RunGame();
 		Thread rt = new Thread(rg);
 		rt.start();
+		
 
 	}
 	private void makeGUI() {
@@ -52,7 +60,7 @@ public class GameClient extends JApplet {
 		add(grid, BorderLayout.CENTER);
 		status = new JLabel("Tic Tac Toe Started");
 		add(status, BorderLayout.SOUTH);
-		setSize(800, 800);
+		setSize(1000, 1000);
 		
 		setVisible(true);
 	}
@@ -65,10 +73,13 @@ public class GameClient extends JApplet {
 	}
 	private void setCon() {
 		try {
-			Socket s = new Socket("localhost",7777);
+			Socket s = new Socket(hostname,7777);
 			status.setText("Connected to server");
 			in = new DataInputStream(s.getInputStream());
 			out = new DataOutputStream(s.getOutputStream());
+		} catch(ConnectException e){
+			JOptionPane.showMessageDialog(this,"Cannot connect to server", "Connection Error",JOptionPane.ERROR_MESSAGE);
+			System.exit(-1);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			status.setText(e.toString());
@@ -84,12 +95,16 @@ public class GameClient extends JApplet {
 	class RunGame implements Runnable {
 		public void run() {
 			try { 
+				
 				while (true) {
-					int inMsg = in.readByte();
-					System.out.println("From server:"+ inMsg);
-					ComHelper com = new ComHelper(inMsg);
-					if (com.getMsg()==ComHelper.START) {
-						playerID=com.getData();
+					int inMsg = in.readInt();
+					System.out.println("From server:"+ Integer.toHexString(inMsg));
+					//ComHelper com = new ComHelper(inMsg);
+					Messenger m = new Messenger(inMsg);
+					
+					if (m.isStartMsg()) {
+						playerID=m.getData();
+						p = new Player(playerID);
 						if (playerID==1) {
 							
 							setWaiting(false);
@@ -100,20 +115,36 @@ public class GameClient extends JApplet {
 							status.setText("Game started. You are O. Player X starts");
 						}
 					}
-					else if (com.getMsg()==ComHelper.X)	{
-						int x = com.getRow();
-						int y = com.getCol();
-						for (GamePanel gp : playBoard) {
-							if( ( gp.getRow() ==x) && (gp.getCol() ==y)) {
-								gp.setPanel("X");
-								gp.repaint();
-							}
-						}
+					
+					else if (m.getLetter()=="X")	{
+						{playLetter(m);}
+					}
+					else if (m.getLetter()=="O") 
+					{playLetter(m);}
+					else if (m.isWinMsg())  {
+						int winPlyr = m.getData();
+						if (winPlyr == playerID)
+						    status.setText("You  won!");
+						else
+							status.setText("You Lost! Good Day Sir!");
 					}
 				}
 			}
 			catch (IOException e) {
 				status.setText(e.toString());
+			}
+		}
+		public void playLetter(Messenger m) throws IOException{
+			int x = m.getRow();
+			int y = m.getCol();
+			for (GamePanel gp : playBoard) {
+				gp.setWaiting(!gp.isWaiting());
+				if( ( gp.getRow() ==x) && (gp.getCol() ==y)) {
+					gp.setPanel(m.getLetter());
+					
+					
+				}
+				gp.repaint();
 			}
 		}
 	}
@@ -133,7 +164,7 @@ public class GameClient extends JApplet {
 				msg = (ac.getRow() <<2) + ac.getCol();
 				System.out.println(Integer.toBinaryString(msg));
 				try {
-				out.writeByte(msg);
+				out.writeInt(msg);
 				}
 				catch(IOException e) {
 					System.err.println(e.toString() );
