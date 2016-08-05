@@ -1,16 +1,30 @@
 package tictactoe;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
+
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.List;
+
 
 import javax.swing.*;
+/**
+ * GameClient - Client for Tic Tac Toe
+ * 
+ * @author Blair Sweigman
+ *
+ */
+/**
+ * @author blair
+ *
+ */
+/**
+ * @author blair
+ *
+ */
 @SuppressWarnings("serial")
 public class GameClient extends JApplet {
 	private JPanel grid;
@@ -19,27 +33,40 @@ public class GameClient extends JApplet {
 	private DataInputStream in;
 	private DataOutputStream out;
 	private int playerID;
-	private String toDraw;
-	private Player p ;
+	//private String toDraw;
+	//private Player p ;
 	private static String hostname;
 	public static void main(String[] args) {
-		// check if there is a hostname, if not, connect to localhost
-		if (args.length > 0)
-			hostname = args[0];
-		else
-			hostname = "localhost";
-		new GameClient();
+		
 	}
-	public GameClient() {
-		this.setSize(1000, 1000);
+	
+	
+
+	
+	/* Start up Applet */
+	public void init() {
+		getHost();
 		makeGUI();
 		setCon();
 		RunGame rg = new RunGame();
 		Thread rt = new Thread(rg);
 		rt.start();
-		
-
 	}
+	
+	/**
+	 *  getHost - tries to get host from Applet parameters
+	 * 	sets host to localhost if hostname absent
+	 */
+	private void getHost(){
+		if (this.getParameter("hostname")!= null)
+		   hostname =this.getParameter("hostname");
+		else
+			hostname = "localhost";
+	}
+	
+	/**
+	 *  makeGUI - builds the GUI for the client
+	 */
 	private void makeGUI() {
 		grid = new JPanel();
 		grid.setBackground(Color.BLACK);
@@ -60,10 +87,14 @@ public class GameClient extends JApplet {
 		add(grid, BorderLayout.CENTER);
 		status = new JLabel("Tic Tac Toe Started");
 		add(status, BorderLayout.SOUTH);
-		setSize(1000, 1000);
-		
+		setSize(300, 300);
 		setVisible(true);
 	}
+	
+	/**
+	 * setWaiting - disables player from making a move when it is not their turn
+	 * @param b - true disables panels, false enables the panels
+	 */
 	private void setWaiting(boolean b) {
 		
 		for (GamePanel gamePanel : playBoard) {
@@ -71,14 +102,18 @@ public class GameClient extends JApplet {
 		}
 		
 	}
+	/**
+	 * setCon - Connects to server
+	 */
+	@SuppressWarnings("resource")
 	private void setCon() {
 		try {
 			Socket s = new Socket(hostname,7777);
-			status.setText("Connected to server");
+			status.setText("Connected to server: " + hostname);
 			in = new DataInputStream(s.getInputStream());
 			out = new DataOutputStream(s.getOutputStream());
 		} catch(ConnectException e){
-			JOptionPane.showMessageDialog(this,"Cannot connect to server", "Connection Error",JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this,"Cannot connect to server: " + hostname, "Connection Error",JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -104,7 +139,7 @@ public class GameClient extends JApplet {
 					
 					if (m.isStartMsg()) {
 						playerID=m.getData();
-						p = new Player(playerID);
+						//p = new Player(playerID);
 						if (playerID==1) {
 							
 							setWaiting(false);
@@ -127,13 +162,28 @@ public class GameClient extends JApplet {
 						    status.setText("You  won!");
 						else
 							status.setText("You Lost! Good Day Sir!");
+						for (GamePanel gp : playBoard) {
+							gp.setWaiting(true);
+						}
 					}
+					else if (m.isDraw()) {
+						status.setText("It is a Draw!");
+					}
+					else if (m.isInvalid()) {
+						status.setText("Sorry, that is not a valid move");
+					}
+					
 				}
 			}
 			catch (IOException e) {
 				status.setText(e.toString());
 			}
 		}
+		/**
+		 * Puts letter on the board, and switches turns
+		 * @param m the message from the board
+		 * @throws IOException
+		 */
 		public void playLetter(Messenger m) throws IOException{
 			int x = m.getRow();
 			int y = m.getCol();
